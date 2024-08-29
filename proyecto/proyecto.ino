@@ -10,10 +10,10 @@ int rightLastState = HIGH;
 int rightCurrentState;
 
 int ledPin = 27;
-
 int servoPin = 17;
 
 Servo servo;
+bool leftButtonPressed = false;
 
 void setup() {
   pinMode(leftButtonPin, INPUT_PULLUP);
@@ -22,33 +22,26 @@ void setup() {
   pinMode(ledPin, OUTPUT);
 
   servo.attach(servoPin, 500, 2400);
-  int pos = 0;
-
 
   Serial.begin(115200);
 }
 
 void loop() {
-
   leftCurrentState = digitalRead(leftButtonPin);
   rightCurrentState = digitalRead(rightButtonPin);
 
-
-  if (leftLastState == LOW && leftCurrentState == HIGH) {
+  if (leftLastState == HIGH && leftCurrentState == LOW) {
+    leftButtonPressed = !leftButtonPressed; // Toggle the button pressed state
     Serial.println("Botón 1 presionado");
-    // for (pos = 0; pos <= 180; pos += 1) {
-    // servo.write(pos);
-    // delay(15);
-    digitalWrite(ledPin, HIGH);
   }
-   else {
-    Serial.println("Botón 1 no presionado");
-    //  for (pos = 180; pos >= 0; pos -= 1) {
-    // servo.write(pos);
-    // delay(15);
-    digitalWrite(ledPin, LOW);
+
+  if (leftButtonPressed) {
+    digitalWrite(ledPin, HIGH); // Keep LED on
+  } else {
+    digitalWrite(ledPin, LOW); // Turn LED off
   }
-  
+
   leftLastState = leftCurrentState;
-  delay(200);
+
+  delay(50); // Debounce delay
 }
