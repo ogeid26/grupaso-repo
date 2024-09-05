@@ -1,5 +1,5 @@
-#ifndef SERVOCONTROL_H
-#define SERVOCONTROL_H
+#ifndef SERVOHANDLER_H
+#define SERVOHANDLER_H
 
 #include <ESP32Servo.h>
 
