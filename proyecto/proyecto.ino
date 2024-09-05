@@ -2,135 +2,98 @@
 #include <Adafruit_Sensor.h>
 #include <ESP32Servo.h>
 
-// Botones
-
-const int leftButtonPin = 34;
-const int rightButtonPin = 35;
-
-int leftLastState = HIGH;
-int leftCurrentState;
-
-int rightLastState = HIGH;
-int rightCurrentState;
-
-// LEDs
-
-const int leftLedPin = 27;
-const int rightLedPin = 26;
-
-// Servo
-
-// Left
+// Servo Pins
 const int servo1Pin = 16;
-// Right
 const int servo2Pin = 17;
 
-int servo1RD;
-int servo2RD;
+int servo1RD = 90; // Initial position of servo1
+int servo2RD = 90; // Initial position of servo2
+int random_variable;
 
-int flapSpeed;
+
+const int flapSpeed = 6; // Speed of servo movement
 
 Servo servo1;
 Servo servo2;
 
+float rotationY;
+
 // Gyro
 Adafruit_MPU6050 mpu;
 
-
 void setup() {
-  // LEDs
-  pinMode(leftButtonPin, INPUT_PULLUP);
-  pinMode(rightButtonPin, INPUT_PULLUP);
-
-  pinMode(leftLedPin, OUTPUT);
-  pinMode(rightLedPin, OUTPUT);
-
   servo1.attach(servo1Pin, 500, 2400);
   servo2.attach(servo2Pin, 500, 2400);
-  servo1RD = 90;
-  servo2RD = 90;
+  
   servo1.write(servo1RD);
   servo2.write(servo2RD);
-
-  flapSpeed = 3;
 
   Serial.begin(115200);
 
   if (!mpu.begin()) {
-     Serial.println("Sensor init failed");
-     while (1)
-    yield();
-      }
+    Serial.println("Sensor init failed");
+    while (1) {
+      delay(10); // Wait here if sensor initialization fails
+    }
+  }
 }
 
 void loop() {
-
-  leftCurrentState = digitalRead(leftButtonPin);
-  rightCurrentState = digitalRead(rightButtonPin);
-
-  if (leftCurrentState == LOW) {
-    Serial.println("Botón 1 presionado");
-    digitalWrite(leftLedPin, HIGH); // Enciende el LED
-
-    // Gira el servo mientras se presiona el botón
-      if (servo1RD < 180) {
-      servo1RD += flapSpeed; // Incrementa la rotación
-      servo1.write(servo1RD);
-      servo2.write(180-servo1RD);
-      delay(20); // Ajusta la velocidad del servo
-
-    }
-  } else if (leftCurrentState == HIGH) {
-//    Serial.println("Botón 1 no presionado");
-    digitalWrite(leftLedPin, LOW); // Apaga el LED
-  }
-
-  if (rightCurrentState == LOW) {
-    Serial.println("Botón 2 presionado");
-    digitalWrite(rightLedPin, HIGH);
-  
-
-      if (servo1RD > 0) {
-      servo1RD -= flapSpeed; // Decrementa la rotación
-      servo1.write(servo1RD);
-      servo2.write(180-servo1RD);
-      delay(20); // Ajusta la velocidad del servo
-
-      }
-
-  }
-    else if (rightCurrentState == HIGH) {
-    digitalWrite(rightLedPin, LOW);
-  }
-
-  leftLastState = leftCurrentState;
-  rightLastState = rightCurrentState;
-
-  gyroInfo();
-  delay(50); // Debounce delay
-
-  
-}
-
-void gyroInfo() {
+    random_variable = random(0, 1000);
   sensors_event_t acc, gcc, temp;
-mpu.getEvent(&acc, &gcc, &temp);
-Serial.print("Acceleration on x axes: ");
-Serial.println(acc.acceleration.x);
-  delay(1000); // this speeds up the simulation
+  mpu.getEvent(&acc, &gcc, &temp);
 
-Serial.print("Acceleration on y axes: ");
-Serial.println(acc.acceleration.y);
-  delay(1000);
+  rotationY = gcc.gyro.y;
 
-Serial.print("Acceleration on z axes: ");
-Serial.println(acc.acceleration.z);
-  delay(1000);
+  Serial.print("Variable_1:");
+  Serial.print(random_variable);
+  Serial.print(",");
 
-Serial.println("Rotation of x axes: ");
-Serial.println((gcc.gyro.x)*180/3.14);
-  delay(1000);
+  // Print values to Serial Plotter
+  Serial.print("AccX:");
+  Serial.print(acc.acceleration.x);
+  Serial.print(",");
 
+  Serial.print("AccY: ");
+  Serial.print(acc.acceleration.y);
+  Serial.print(",");
+
+  Serial.print("AccZ: ");
+  Serial.print(acc.acceleration.z);
+  Serial.print(",");
+
+  Serial.print("GyroX: ");
+  Serial.print(gcc.gyro.x);
+  Serial.print(",");
+
+  Serial.print("GyroY: ");
+  Serial.print(rotationY);
+  Serial.print(",");
+
+  Serial.print("GyroZ: ");
+  Serial.println(gcc.gyro.z);
+  Serial.print(",");
+
+
+  // Control servos based on rotationY
+  if (abs(rotationY) > 1.0) { // Adjust the threshold as needed
+    if (rotationY > 0) {
+      if (servo1RD < 180) {
+        servo1RD += flapSpeed;
+        servo1.write(servo1RD);
+        //servo2RD = 180 - servo1RD;
+        servo2.write(servo1RD);
+      }
+    } else {
+      if (servo1RD > 0) {
+        servo1RD -= flapSpeed;
+        servo1.write(servo1RD);
+       // servo2RD = 180 - servo1RD;
+        servo2.write(servo1RD);
+      }
+    }
+    delay(20); // Adjust delay for servo movement
+  }
+
+  delay(50); // Debounce delay
 }
-
-
