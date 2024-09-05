@@ -79,14 +79,14 @@ void loop() {
   if (abs(rotationY) > 1.0) { // Adjust the threshold as needed
     if (rotationY > 0) {
       if (servo1RD < 180) {
-        servo1RD += flapSpeed;
+        servo1RD -= flapSpeed;
         servo1.write(servo1RD);
         //servo2RD = 180 - servo1RD;
         servo2.write(servo1RD);
       }
     } else {
       if (servo1RD > 0) {
-        servo1RD -= flapSpeed;
+        servo1RD += flapSpeed;
         servo1.write(servo1RD);
        // servo2RD = 180 - servo1RD;
         servo2.write(servo1RD);
