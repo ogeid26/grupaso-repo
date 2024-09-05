@@ -10,7 +10,10 @@ int rightLastState = HIGH;
 int rightCurrentState;
 
 int ledPin = 27;
+int rightLedPin = 26;
+
 int servoPin = 17;
+git a
 int rotationDegree = 0;
 
 int flapSpeed;
@@ -22,6 +25,7 @@ void setup() {
   pinMode(rightButtonPin, INPUT_PULLUP);
 
   pinMode(ledPin, OUTPUT);
+  pinMode(rightLedPin, OUTPUT);
 
   servo.attach(servoPin, 500, 2400);
   rotationDegree = 90;
@@ -46,12 +50,24 @@ void loop() {
       servo.write(rotationDegree);
       delay(15); // Ajusta la velocidad del servo
     }
-  } else {
+  } else if (leftCurrentState == HIGH) {
     Serial.println("Botón 1 no presionado");
     digitalWrite(ledPin, LOW); // Apaga el LED
   }
 
+  if (rightCurrentState == LOW) {
+    Serial.println("Botón 2 presionado");
+    digitalWrite(rightLedPin, HIGH);
+
+  }
+
+  else if (rightCurrentState = HIGH) {
+    digitalWrite(rightLedPin, LOW);
+  }
+
+
   leftLastState = leftCurrentState;
+  rightLastState = rightCurrentState;
 
   delay(50); // Debounce delay
 }
